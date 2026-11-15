@@ -1,0 +1,66 @@
+Capy PDF － 用 GitHub 自動打包 Mac 版（同時可打包 Windows 版）
+=====================================================================
+
+【一、第一次設定（約 10 分鐘，只要做一次）】
+
+1. 註冊 GitHub 帳號
+   到 https://github.com 按「Sign up」，用 Email 註冊並驗證。
+
+2. 建立專案（Repository）
+   登入後點右上角「＋」→「New repository」
+   ‧Repository name：capy-pdf（任意英文名稱）
+   ‧選「Private」（私人，只有你看得到）
+   ‧其他都不用勾，按「Create repository」
+
+3. 上傳檔案
+   在新專案頁面點「uploading an existing file」
+   （或「Add file」→「Upload files」）
+   把解壓縮後「Capy-PDF」資料夾「裡面」的全部內容拖進去：
+     .github、desktop、web、.gitignore、使用說明.txt …
+   ※ 是拖資料夾裡面的東西，不是拖 Capy-PDF 資料夾本身
+   等上傳完成，按下方綠色「Commit changes」。
+
+4. 確認打包設定有上傳
+   專案首頁應該看得到「.github」資料夾。
+   如果沒有（部分瀏覽器會略過以「.」開頭的資料夾）：
+   ‧點「Add file」→「Create new file」
+   ‧檔名欄輸入：.github/workflows/build.yml
+   ‧用記事本打開「GitHub打包設定（備用複製用）.yml.txt」，全選複製後貼上
+   ‧按「Commit changes」
+
+【二、開始打包】
+
+1. 到專案上方的「Actions」分頁
+   （第一次可能要按「I understand my workflows, go ahead and enable them」）
+2. 左側點「打包 Capy PDF」→ 右側「Run workflow」
+3. 選擇要打包的版本：both（兩個都要）／mac／windows → 綠色「Run workflow」
+4. 等待約 10～20 分鐘，出現綠色勾勾 ✔ 就完成了
+5. 點進那次執行，頁面最下方「Artifacts」：
+   ‧Capy-PDF-Mac → 下載後解壓縮得到 Capy-PDF-Mac-x.x.x.dmg
+   ‧Capy-PDF-Windows → 下載後解壓縮得到 Capy-PDF-Setup-x.x.x.exe
+   （檔案保留 30 天）
+
+【三、以後更新程式】
+拿到新版的打包檔後，只要把新的 desktop/app/index.html（有變動時也包含 main.js 等）
+在 GitHub 上用「Add file → Upload files」上傳覆蓋，再到 Actions 重新「Run workflow」即可。
+
+【四、在 Mac 上安裝】
+1. 雙擊 .dmg，把「Capy PDF」拖到「應用程式（Applications）」資料夾
+2. 第一次開啟：在「應用程式」裡對 Capy PDF 按右鍵（或 Control＋點按）→「打開」→ 再按「打開」
+   （因為沒有付費的 Apple 開發者簽章，第一次需要這樣確認，之後就能正常雙擊開啟）
+3. 如果出現「已損毀，無法打開」：
+   打開「終端機」，貼上下面這行後按 Enter，再開一次即可：
+   xattr -cr "/Applications/Capy PDF.app"
+4. 想用 Capy PDF 開 PDF：在 PDF 上按右鍵 →「打開檔案的應用程式」→ Capy PDF；
+   或「取得資訊」→「打開檔案的應用程式」改成 Capy PDF →「全部更改」
+
+【五、Mac 版說明】
+‧快捷鍵：Windows 的 Ctrl 在 Mac 上用 ⌘（Command），例如 ⌘Z 復原、⌘S 儲存、⌘F 搜尋
+‧尋找並取代：⌥⌘F（Mac 的 ⌘H 是隱藏程式）
+‧右鍵：觸控板雙指點按，或 Control＋點按
+‧上方選單列有「檔案／編輯／顯示方式／視窗／說明」
+‧一份 .dmg 同時支援 Intel 與 Apple 晶片（M1～M4）的 Mac
+
+【費用】
+私人專案每月有免費額度（Mac 主機的分鐘數消耗較快，每月約可打包 10～15 次 Mac 版），
+自用綽綽有餘；公開專案（Public）則完全免費、不限次數。
