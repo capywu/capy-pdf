@@ -1,7 +1,7 @@
 # Capy PDF：在 GitHub 上自動打包 Mac 版（.dmg）與 Windows 版（.exe）
 # 使用方式：到 GitHub 專案的「Actions」→「打包 Capy PDF」→「Run workflow」
 name: 打包 Capy PDF
- 
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,28 +13,40 @@ on:
         options: [both, mac, windows]
   push:
     tags: ['v*']
- 
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   mac:
     if: github.event_name == 'push' || inputs.target != 'windows'
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: 尋找程式資料夾
+        run: |
+          PJ=$(find . -maxdepth 4 -name package.json -not -path '*/node_modules/*' -exec grep -l '"capy-pdf"' {} + | head -1)
+          if [ -z "$PJ" ]; then
+            echo "::error::找不到 Capy PDF 的程式資料夾（desktop/package.json）。請確認有上傳 desktop 資料夾。目前專案內容如下："
+            find . -maxdepth 3 -not -path './.git*' | sort
+            exit 1
+          fi
+          echo "APPDIR=$(dirname "$PJ")" >> "$GITHUB_ENV"
+          echo "程式資料夾：$(dirname "$PJ")"
       - name: 安裝打包工具
-        working-directory: desktop
-        run: npm install --no-audit --no-fund
+        run: cd "$APPDIR" && npm install --no-audit --no-fund
       - name: 打包 Mac App（Intel＋Apple 晶片通用）
-        working-directory: desktop
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npx electron-builder --mac dir --universal --publish never
+        run: cd "$APPDIR" && npx electron-builder --mac dir --universal --publish never
       - name: 簽署（自用簽章）並製作 DMG
-        working-directory: desktop
         run: |
+          cd "$APPDIR"
           APP="$(ls -d dist/mac*/*.app | head -1)"
           echo "App: $APP"
           xattr -cr "$APP"
@@ -48,29 +60,36 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Capy-PDF-Mac
-          path: desktop/dist/*.dmg
+          path: ${{ env.APPDIR }}/dist/*.dmg
           retention-days: 30
- 
+
   windows:
     if: github.event_name == 'push' || inputs.target != 'mac'
     runs-on: windows-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: 尋找程式資料夾
+        run: |
+          PJ=$(find . -maxdepth 4 -name package.json -not -path '*/node_modules/*' -exec grep -l '"capy-pdf"' {} + | head -1)
+          if [ -z "$PJ" ]; then
+            echo "::error::找不到 Capy PDF 的程式資料夾（desktop/package.json）。請確認有上傳 desktop 資料夾。目前專案內容如下："
+            find . -maxdepth 3 -not -path './.git*' | sort
+            exit 1
+          fi
+          echo "APPDIR=$(dirname "$PJ")" >> "$GITHUB_ENV"
+          echo "程式資料夾：$(dirname "$PJ")"
       - name: 安裝打包工具
-        working-directory: desktop
-        run: npm install --no-audit --no-fund
+        run: cd "$APPDIR" && npm install --no-audit --no-fund
       - name: 打包 Windows 安裝檔
-        working-directory: desktop
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npx electron-builder --win nsis --x64 --publish never
+        run: cd "$APPDIR" && npx electron-builder --win nsis --x64 --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: Capy-PDF-Windows
-          path: desktop/dist/*.exe
+          path: ${{ env.APPDIR }}/dist/*.exe
           retention-days: 30
- 
