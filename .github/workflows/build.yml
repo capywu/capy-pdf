@@ -8,9 +8,15 @@ on:
       target:
         description: '要打包哪個版本'
         required: true
-        default: 'both'
+        default: 'mac'
         type: choice
-        options: [both, mac, windows]
+        options: [mac, both, windows]
+      mac_runner:
+        description: 'Mac 打包主機（Apple 晶片主機常排隊時請選 intel）'
+        required: true
+        default: 'intel'
+        type: choice
+        options: [intel, arm]
   push:
     tags: ['v*']
 
@@ -21,7 +27,8 @@ defaults:
 jobs:
   mac:
     if: github.event_name == 'push' || inputs.target != 'windows'
-    runs-on: macos-15
+    # 打包出來的 App 都是 Intel＋Apple 晶片通用版，與用哪種主機打包無關
+    runs-on: ${{ inputs.mac_runner == 'arm' && 'macos-15' || 'macos-15-intel' }}
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
@@ -57,7 +64,7 @@ jobs:
           cp -R "$APP" dmgroot/
           ln -s /Applications dmgroot/Applications
           hdiutil create -volname "Capy PDF" -srcfolder dmgroot -ov -format UDZO "dist/Capy-PDF-Mac-$VER.dmg"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: Capy-PDF-Mac
           path: ${{ env.APPDIR }}/dist/*.dmg
@@ -84,11 +91,11 @@ jobs:
           echo "程式資料夾：$(dirname "$PJ")"
       - name: 安裝打包工具
         run: cd "$APPDIR" && npm install --no-audit --no-fund
-      - name: 打包 Windows 安裝檔
+      - name: 打包 Windows 安裝檔＋攜帶版
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: cd "$APPDIR" && npx electron-builder --win nsis --x64 --publish never
-      - uses: actions/upload-artifact@v4
+        run: cd "$APPDIR" && npx electron-builder --win nsis portable --x64 --publish never
+      - uses: actions/upload-artifact@v6
         with:
           name: Capy-PDF-Windows
           path: ${{ env.APPDIR }}/dist/*.exe
