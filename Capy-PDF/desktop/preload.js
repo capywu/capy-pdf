@@ -11,5 +11,6 @@ contextBridge.exposeInMainWorld('inkdeskHost', {
   closeOk: () => ipcRenderer.send('close-ok'),
   isMac: process.platform === 'darwin',
   onMenuCmd: cb => ipcRenderer.on('menu-cmd', (_e, c) => cb(c)),
+  readFont: n => ipcRenderer.invoke('read-font', n),
   getPath: f => { try { return webUtils.getPathForFile(f); } catch (e) { return null; } }
 });

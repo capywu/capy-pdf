@@ -1,12 +1,12 @@
 {
   "name": "capy-pdf",
-  "version": "7.1.0",
-  "description": "Capy PDF V7.1 - 自用 PDF 標註工具",
+  "version": "8.1.0",
+  "description": "Capy PDF V8.1 - 自用 PDF 標註工具",
   "author": "Capy",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win nsis --x64",
+    "dist": "electron-builder --win nsis portable --x64",
     "dist:mac": "electron-builder --mac dir --universal --publish never"
   },
   "devDependencies": {
@@ -28,8 +28,15 @@
       "buildResources": "build"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "Capy-PDF-攜帶版-${version}.exe",
+      "unpackDirName": "CapyPDF"
     },
     "nsis": {
       "oneClick": false,

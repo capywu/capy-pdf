@@ -6,7 +6,7 @@ if /i not "%~1"=="run" (
 chcp 65001 >nul
 cd /d "%~dp0"
 if not exist "package.json" (echo 請先把整個 ZIP 解壓縮，再到 desktop 資料夾執行 build-exe.bat。& pause & exit /b 1)
-echo ==== Capy PDF 建立安裝檔 ====
+echo ==== Capy PDF 建立安裝檔＋攜帶版 ====
 where npm >nul 2>nul || (echo 找不到 Node.js，請先到 https://nodejs.org 安裝 LTS 版本後再執行。& pause & exit /b 1)
 
 echo [1/3] 安裝打包工具（第一次需要幾分鐘）...
@@ -31,10 +31,10 @@ pause & exit /b 1
 :wcs_ok
 echo     完成
 
-echo [3/3] 產生安裝檔...
+echo [3/3] 產生安裝檔與攜帶版...
 call npm run dist || (echo 打包失敗，請把上方訊息貼給 Claude。& pause & exit /b 1)
 echo.
-echo 完成！安裝檔在 dist 資料夾：
+echo 完成！dist 資料夾內：Capy-PDF-Setup-*.exe 是安裝檔，Capy-PDF-攜帶版-*.exe 是免安裝攜帶版：
 dir /b dist\*.exe
 start "" "%~dp0dist"
 pause

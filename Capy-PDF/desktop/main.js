@@ -4,7 +4,11 @@ const path = require('path');
 const fs = require('fs');
 
 // 改名後沿用舊版（InkDesk PDF）的設定與工具列位置
-try {
+// 攜帶版：設定、印章、匯入的字型都存在 exe 旁邊的「Capy PDF 資料」資料夾，跟著隨身碟走
+const PORTABLE_DIR = process.env.PORTABLE_EXECUTABLE_DIR || '';
+if (PORTABLE_DIR) {
+  try { const d = path.join(PORTABLE_DIR, 'Capy PDF 資料'); fs.mkdirSync(d, { recursive: true }); app.setPath('userData', d); } catch (e) { }
+} else try {
   const appData = app.getPath('appData'), newDir = path.join(appData, 'Capy PDF');
   if (!fs.existsSync(newDir)) {
     for (const old of ['InkDesk PDF', 'inkdesk-pdf']) {
@@ -69,6 +73,7 @@ if (!app.requestSingleInstanceLock()) {
     if (r.canceled) return [];
     return r.filePaths.map(p => ({ name: path.basename(p), data: fs.readFileSync(p), path: p }));
   });
+  ipcMain.handle('read-font', async (_e, n) => { if (!/^seal\d+\.woff$/.test(String(n))) return null; try { return fs.readFileSync(path.join(__dirname, 'app', 'fonts', n)); } catch (e) { return null; } });
   ipcMain.handle('save-pdf', async (_e, p, data) => { fs.writeFileSync(p, Buffer.from(data)); return true; });
   ipcMain.handle('save-as', async (_e, name, data) => {
     const ext = String(name).split('.').pop().toLowerCase();
@@ -87,7 +92,7 @@ if (!app.requestSingleInstanceLock()) {
     if (b) { const vis = screen.getAllDisplays().some(d => { const a = d.workArea; return b.x < a.x + a.width - 80 && b.x + b.width > a.x + 80 && b.y < a.y + a.height - 60 && b.y + b.height > a.y + 20; }); if (!vis) b = null; }
     win = new BrowserWindow({
       width: b ? b.width : 1400, height: b ? b.height : 900, x: b ? b.x : undefined, y: b ? b.y : undefined, minWidth: 900, minHeight: 600,
-      backgroundColor: '#18181b', title: 'Capy PDF V7.1',
+      backgroundColor: '#18181b', title: 'Capy PDF V8.1' + (PORTABLE_DIR ? ' 攜帶版' : ''),
       icon: path.join(__dirname, 'build', 'icon.png'),
       autoHideMenuBar: true, show: false,
       webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true }
@@ -105,7 +110,7 @@ if (!app.requestSingleInstanceLock()) {
       win.webContents.send('close-request');
       clearTimeout(ackT);
       ackT = setTimeout(() => {   // 畫面沒有回應時的備援
-        const c = dialog.showMessageBoxSync(win, { type: 'warning', buttons: ['關閉', '取消'], defaultId: 1, cancelId: 1, title: 'Capy PDF V7.1', message: '程式沒有回應，確定要關閉嗎？未儲存的變更會遺失。' });
+        const c = dialog.showMessageBoxSync(win, { type: 'warning', buttons: ['關閉', '取消'], defaultId: 1, cancelId: 1, title: 'Capy PDF V8.1' + (PORTABLE_DIR ? ' 攜帶版' : ''), message: '程式沒有回應，確定要關閉嗎？未儲存的變更會遺失。' });
         if (c === 0) { allowClose = true; win.close(); }
       }, 2500);
     });
@@ -125,7 +130,7 @@ if (!app.requestSingleInstanceLock()) {
       if (allowClose) { e.preventDefault(); return; }
       const c = dialog.showMessageBoxSync(win, {
         type: 'warning', buttons: ['不儲存並關閉', '取消'], defaultId: 1, cancelId: 1,
-        title: 'Capy PDF V7.1', message: '有文件的標註還沒匯出成 PDF，確定要關閉嗎？'
+        title: 'Capy PDF V8.1' + (PORTABLE_DIR ? ' 攜帶版' : ''), message: '有文件的標註還沒匯出成 PDF，確定要關閉嗎？'
       });
       if (c === 0) e.preventDefault();
     });
