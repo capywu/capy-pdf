@@ -40,7 +40,7 @@ function macMenu() {
   const sep = { type: 'separator' };
   return Menu.buildFromTemplate([
     { label: 'Capy PDF', submenu: [{ role: 'about', label: '關於 Capy PDF' }, sep, { role: 'hide', label: '隱藏 Capy PDF' }, { role: 'hideOthers', label: '隱藏其他' }, { role: 'unhide', label: '顯示全部' }, sep, { role: 'quit', label: '結束 Capy PDF' }] },
-    { label: '檔案', submenu: [{ label: '開啟…', accelerator: 'CmdOrCtrl+O', click: send('open') }, { label: '儲存', accelerator: 'CmdOrCtrl+S', click: send('save') }, { label: '另存新檔…', accelerator: 'Shift+CmdOrCtrl+S', click: send('saveas') }, { label: '匯出 PDF／Word…', accelerator: 'CmdOrCtrl+E', click: send('export') }, sep, { role: 'close', label: '關閉視窗' }] },
+    { label: '檔案', submenu: [{ label: '開啟…', accelerator: 'CmdOrCtrl+O', click: send('open') }, { label: '儲存', accelerator: 'CmdOrCtrl+S', click: send('save') }, { label: '另存新檔…', accelerator: 'Shift+CmdOrCtrl+S', click: send('saveas') }, { label: '匯出 PDF／Word…', accelerator: 'CmdOrCtrl+E', click: send('export') }, { label: '列印…', accelerator: 'CmdOrCtrl+P', click: send('print') }, sep, { role: 'close', label: '關閉視窗' }] },
     { label: '編輯', submenu: [{ label: '復原', accelerator: 'CmdOrCtrl+Z', click: both('undo', 'undo') }, { label: '重做', accelerator: 'Shift+CmdOrCtrl+Z', click: both('redo', 'redo') }, sep, { label: '剪下', accelerator: 'CmdOrCtrl+X', click: both('cut', 'cut') }, { label: '拷貝', accelerator: 'CmdOrCtrl+C', click: both('copy', 'copy') }, { label: '貼上', accelerator: 'CmdOrCtrl+V', click: both('paste', 'paste') }, { label: '全選', accelerator: 'CmdOrCtrl+A', click: both('selectAll', 'selectall') }, sep, { label: '尋找', accelerator: 'CmdOrCtrl+F', click: send('find') }, { label: '尋找並取代', accelerator: 'Alt+CmdOrCtrl+F', click: send('replace') }] },
     { label: '顯示方式', submenu: [{ label: '放大', accelerator: 'CmdOrCtrl+=', click: send('zoomin') }, { label: '縮小', accelerator: 'CmdOrCtrl+-', click: send('zoomout') }, { label: '實際大小', accelerator: 'CmdOrCtrl+0', click: send('zoom100') }, sep, { role: 'togglefullscreen', label: '進入／結束全螢幕' }] },
     { role: 'windowMenu', label: '視窗' },
@@ -92,7 +92,7 @@ if (!app.requestSingleInstanceLock()) {
     if (b) { const vis = screen.getAllDisplays().some(d => { const a = d.workArea; return b.x < a.x + a.width - 80 && b.x + b.width > a.x + 80 && b.y < a.y + a.height - 60 && b.y + b.height > a.y + 20; }); if (!vis) b = null; }
     win = new BrowserWindow({
       width: b ? b.width : 1400, height: b ? b.height : 900, x: b ? b.x : undefined, y: b ? b.y : undefined, minWidth: 900, minHeight: 600,
-      backgroundColor: '#18181b', title: 'Capy PDF V8.1' + (PORTABLE_DIR ? ' 攜帶版' : ''),
+      backgroundColor: '#18181b', title: 'Capy PDF V8.2' + (PORTABLE_DIR ? ' 攜帶版' : ''),
       icon: path.join(__dirname, 'build', 'icon.png'),
       autoHideMenuBar: true, show: false,
       webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true }
@@ -110,7 +110,7 @@ if (!app.requestSingleInstanceLock()) {
       win.webContents.send('close-request');
       clearTimeout(ackT);
       ackT = setTimeout(() => {   // 畫面沒有回應時的備援
-        const c = dialog.showMessageBoxSync(win, { type: 'warning', buttons: ['關閉', '取消'], defaultId: 1, cancelId: 1, title: 'Capy PDF V8.1' + (PORTABLE_DIR ? ' 攜帶版' : ''), message: '程式沒有回應，確定要關閉嗎？未儲存的變更會遺失。' });
+        const c = dialog.showMessageBoxSync(win, { type: 'warning', buttons: ['關閉', '取消'], defaultId: 1, cancelId: 1, title: 'Capy PDF V8.2' + (PORTABLE_DIR ? ' 攜帶版' : ''), message: '程式沒有回應，確定要關閉嗎？未儲存的變更會遺失。' });
         if (c === 0) { allowClose = true; win.close(); }
       }, 2500);
     });
@@ -130,7 +130,7 @@ if (!app.requestSingleInstanceLock()) {
       if (allowClose) { e.preventDefault(); return; }
       const c = dialog.showMessageBoxSync(win, {
         type: 'warning', buttons: ['不儲存並關閉', '取消'], defaultId: 1, cancelId: 1,
-        title: 'Capy PDF V8.1' + (PORTABLE_DIR ? ' 攜帶版' : ''), message: '有文件的標註還沒匯出成 PDF，確定要關閉嗎？'
+        title: 'Capy PDF V8.2' + (PORTABLE_DIR ? ' 攜帶版' : ''), message: '有文件的標註還沒匯出成 PDF，確定要關閉嗎？'
       });
       if (c === 0) e.preventDefault();
     });

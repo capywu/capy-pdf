@@ -1,13 +1,13 @@
 {
   "name": "capy-pdf",
-  "version": "8.1.0",
-  "description": "Capy PDF V8.1 - 自用 PDF 標註工具",
+  "version": "8.2.0",
+  "description": "Capy PDF V8.2 - 自用 PDF 標註工具",
   "author": "Capy",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis portable --x64",
-    "dist:mac": "electron-builder --mac dir --universal --publish never"
+    "dist:mac": "electron-builder --mac dir --arm64 --publish never"
   },
   "devDependencies": {
     "electron": "^33.2.0",
@@ -64,7 +64,7 @@
         {
           "target": "dir",
           "arch": [
-            "universal"
+            "arm64"
           ]
         }
       ],

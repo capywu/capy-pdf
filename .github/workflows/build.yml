@@ -1,4 +1,4 @@
-# Capy PDF：在 GitHub 上自動打包 Mac 版（.dmg）與 Windows 版（.exe）
+# Capy PDF：在 GitHub 上自動打包 Mac Apple 晶片版（arm64 .dmg）與 Windows 安裝版（x64 .exe）
 # 使用方式：到 GitHub 專案的「Actions」→「打包 Capy PDF」→「Run workflow」
 name: 打包 Capy PDF
 
@@ -8,9 +8,9 @@ on:
       target:
         description: '要打包哪個版本'
         required: true
-        default: 'mac'
+        default: 'both'
         type: choice
-        options: [mac, both, windows]
+        options: [both, mac, windows]
       mac_runner:
         description: 'Mac 打包主機（Apple 晶片主機常排隊時請選 intel）'
         required: true
@@ -27,7 +27,7 @@ defaults:
 jobs:
   mac:
     if: github.event_name == 'push' || inputs.target != 'windows'
-    # 打包出來的 App 都是 Intel＋Apple 晶片通用版，與用哪種主機打包無關
+    # 產出 Apple 晶片（M1～M4）專用版；用 Intel 或 Apple 晶片主機打包結果相同
     runs-on: ${{ inputs.mac_runner == 'arm' && 'macos-15' || 'macos-15-intel' }}
     timeout-minutes: 45
     steps:
@@ -47,10 +47,10 @@ jobs:
           echo "程式資料夾：$(dirname "$PJ")"
       - name: 安裝打包工具
         run: cd "$APPDIR" && npm install --no-audit --no-fund
-      - name: 打包 Mac App（Intel＋Apple 晶片通用）
+      - name: 打包 Mac App（Apple 晶片 arm64）
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: cd "$APPDIR" && npx electron-builder --mac dir --universal --publish never
+        run: cd "$APPDIR" && npx electron-builder --mac dir --arm64 --publish never
       - name: 簽署（自用簽章）並製作 DMG
         run: |
           cd "$APPDIR"
@@ -63,7 +63,7 @@ jobs:
           rm -rf dmgroot && mkdir dmgroot
           cp -R "$APP" dmgroot/
           ln -s /Applications dmgroot/Applications
-          hdiutil create -volname "Capy PDF" -srcfolder dmgroot -ov -format UDZO "dist/Capy-PDF-Mac-$VER.dmg"
+          hdiutil create -volname "Capy PDF" -srcfolder dmgroot -ov -format UDZO "dist/Capy-PDF-Mac-arm64-$VER.dmg"
       - uses: actions/upload-artifact@v6
         with:
           name: Capy-PDF-Mac
@@ -91,10 +91,10 @@ jobs:
           echo "程式資料夾：$(dirname "$PJ")"
       - name: 安裝打包工具
         run: cd "$APPDIR" && npm install --no-audit --no-fund
-      - name: 打包 Windows 安裝檔＋攜帶版
+      - name: 打包 Windows 安裝檔
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: cd "$APPDIR" && npx electron-builder --win nsis portable --x64 --publish never
+        run: cd "$APPDIR" && npx electron-builder --win nsis --x64 --publish never
       - uses: actions/upload-artifact@v6
         with:
           name: Capy-PDF-Windows
